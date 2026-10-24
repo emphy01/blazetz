@@ -1,0 +1,33 @@
+
+# ============================================================
+#  BLAZT – .gitignore
+#  Target deployment: Railway (via GitHub repo)
+# ============================================================
+
+# ── Sensitive / secret files ─────────────────────────────────
+config.php
+.env
+.env.*
+
+# ── Database dumps (jangan di-commit ke repo publik) ─────────
+*.sql
+
+# ── Log files ─────────────────────────────────────────────────
+logs/*.log
+logs/php_errors.log
+
+# ── OS & editor artefacts ────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.code-workspace
+.idea/
+.vscode/
+
+# ── Script yang hanya dipakai sekali (seed) ──────────────────
+seed_products.php
+seed_user.php
+
+# ── File duplikat / tidak diperlukan ─────────────────────────
+config02.php
+blazt.gitignore

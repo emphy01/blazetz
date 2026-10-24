@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /config.php
+Disallow: /db.php
+Disallow: /auth.php
+Disallow: /functions.php
+Disallow: /cart_functions.php
+Disallow: /authenticate.php
+Disallow: /seed_products.php
+Disallow: /seed_user.php
+Disallow: /logs/
+Disallow: /*.sql
+
+Sitemap: https://yourdomain.com/sitemap.xml
