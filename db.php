@@ -5,7 +5,29 @@
  * Error display is suppressed in production; errors are logged to file instead.
  */
 
-require_once __DIR__ . '/config.php';
+if (file_exists(__DIR__ . '/config.php')) {
+    require_once __DIR__ . '/config.php';
+}
+
+// Fallback constants from environment variables (useful for cloud platforms like Render)
+if (!defined('DB_HOST')) {
+    define('DB_HOST', getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '127.0.0.1');
+}
+if (!defined('DB_NAME')) {
+    define('DB_NAME', getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'test');
+}
+if (!defined('DB_USER')) {
+    define('DB_USER', getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root');
+}
+if (!defined('DB_PASS')) {
+    define('DB_PASS', getenv('MYSQLPASSWORD') ?: getenv('DB_PASS') ?: getenv('DB_PASSWORD') ?: '');
+}
+if (!defined('DB_PORT')) {
+    define('DB_PORT', getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: '4000');
+}
+if (!defined('APP_ENV')) {
+    define('APP_ENV', getenv('APP_ENV') ?: 'production');
+}
 
 // Apply environment-aware error settings.
 if (APP_ENV === 'production') {
@@ -21,15 +43,27 @@ if (APP_ENV === 'production') {
 }
 
 try {
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ];
+
+    // TiDB Cloud requires SSL/TLS encryption
+    $isTiDB = (strpos(DB_HOST, 'tidbcloud.com') !== false) || (getenv('MYSQL_SSL') === 'true');
+    if ($isTiDB) {
+        if (file_exists('/etc/ssl/certs/ca-certificates.crt')) {
+            $options[PDO::MYSQL_ATTR_SSL_CA] = '/etc/ssl/certs/ca-certificates.crt';
+        } else {
+            $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+        }
+    }
+
     $pdo = new PDO(
         'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4',
         DB_USER,
         DB_PASS,
-        [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ]
+        $options
     );
 } catch (PDOException $e) {
     if (APP_ENV === 'production') {

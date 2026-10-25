@@ -1,0 +1,8 @@
+.git
+.gitignore
+*.sql
+logs/*.log
+blazt.gitignore
+config02.php
+seed_products.php
+seed_user.php
